@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker</title>
+    <script src="node_modules/chart.js/dist/chart.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Authentication Screen -->
+    <div id="auth-screen" class="auth-screen">
+        <div class="auth-container">
+            <div class="auth-brand">
+                <div class="auth-logo">FT</div>
+                <div>
+                    <h2>Finance Tracker</h2>
+                    <p>Login atau buat akun baru untuk mengelola keuangan Anda secara profesional.</p>
+                </div>
+            </div>
+
+            <div class="auth-tabs">
+                <button id="auth-tab-login" class="auth-tab-button active" onclick="showLoginForm()">Login</button>
+                <button id="auth-tab-register" class="auth-tab-button" onclick="showRegisterForm()">Buat Akun</button>
+            </div>
+
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input id="login-email" type="email" placeholder="email@domain.com" class="form-control" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input id="login-password" type="password" placeholder="Password" class="form-control" autocomplete="current-password">
+                </div>
+                <button type="button" class="btn btn-primary btn-block" onclick="login()">Login</button>
+                <div id="login-error" class="message-error"></div>
+            </form>
+
+            <form id="register-form" class="auth-form hidden">
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input id="register-email" type="email" placeholder="email@domain.com" class="form-control" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input id="register-password" type="password" placeholder="Minimal 6 karakter" class="form-control" autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm-password">Konfirmasi Password</label>
+                    <input id="register-confirm-password" type="password" placeholder="Ulangi password" class="form-control" autocomplete="new-password">
+                </div>
+                <button type="button" class="btn btn-primary btn-block" onclick="createAccount()">Buat Akun</button>
+                <div id="register-error" class="message-error"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="main-app" class="main-app hidden">
+        <div class="app-shell">
+            <aside class="sidebar">
+                <div class="brand-panel">
+                    <div class="brand-logo">FT</div>
+                    <div>
+                        <h2>Finance Tracker</h2>
+                        <p>Dashboard</p>
+                    </div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="#overview" class="sidebar-link active">Overview</a>
+                    <a href="#transactions" class="sidebar-link">Transaksi</a>
+                    <a href="#charts" class="sidebar-link">Analytics</a>
+                    <a href="#settings" class="sidebar-link">Pengaturan</a>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="sidebar-status">
+                        <span>Pengguna</span>
+                        <strong id="sidebar-user">-</strong>
+                    </div>
+                    <p class="sidebar-note">Data tersimpan secara lokal dan siap untuk build Windows.</p>
+                </div>
+            </aside>
+
+            <main class="content">
+                <header class="topbar">
+                    <div>
+                        <p class="topbar-label">Ringkasan Keuangan</p>
+                        <h1>Hai, <span id="welcome-text">Pengguna</span></h1>
+                    </div>
+                    <div class="topbar-actions">
+                        <button class="btn btn-secondary" onclick="toggleDarkMode()">Mode Gelap</button>
+                        <button class="btn btn-tertiary" onclick="logout()">Logout</button>
+                    </div>
+                </header>
+
+                <section id="overview" class="overview-grid">
+                    <article class="overview-card">
+                        <h3>Saldo Bersih</h3>
+                        <p id="card-balance">Rp 0</p>
+                    </article>
+                    <article class="overview-card success-card">
+                        <h3>Total Pendapatan</h3>
+                        <p id="card-income">Rp 0</p>
+                    </article>
+                    <article class="overview-card danger-card">
+                        <h3>Total Pengeluaran</h3>
+                        <p id="card-expense">Rp 0</p>
+                    </article>
+                    <article class="overview-card info-card">
+                        <h3>Kategori Teratas</h3>
+                        <p id="card-top-category">-</p>
+                    </article>
+                </section>
+
+                <section id="charts" class="chart-grid">
+                    <div class="chart-box">
+                        <div class="chart-title">Income vs Expense</div>
+                        <canvas id="income-expense-chart"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <div class="chart-title">Distribusi Kategori</div>
+                        <canvas id="category-chart"></canvas>
+                    </div>
+                </section>
+
+                <section class="workspace">
+                    <div class="panel add-panel">
+                        <div class="panel-header">
+                            <div>
+                                <span class="panel-tag">Tambah</span>
+                                <h2>Tambah Transaksi</h2>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label>Deskripsi</label>
+                                <input id="desc" type="text" placeholder="Contoh: Gaji, Makan siang" class="form-control">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>Jumlah</label>
+                                    <input id="amount" type="number" placeholder="0" class="form-control">
+                                </div>
+                                <div class="form-group half">
+                                    <label>Kategori</label>
+                                    <select id="category" class="form-control">
+                                        <option value="">Pilih kategori</option>
+                                        <option value="Makanan">Makanan</option>
+                                        <option value="Transportasi">Transportasi</option>
+                                        <option value="Kerja">Kerja</option>
+                                        <option value="Hiburan">Hiburan</option>
+                                        <option value="Kesehatan">Kesehatan</option>
+                                        <option value="Pendidikan">Pendidikan</option>
+                                        <option value="Lainnya">Lainnya</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label>Tipe</label>
+                                    <select id="type" class="form-control">
+                                        <option value="expense">Pengeluaran</option>
+                                        <option value="income">Pendapatan</option>
+                                    </select>
+                                </div>
+                                <div class="form-group half">
+                                    <label>Tanggal</label>
+                                    <input id="date" type="date" class="form-control">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-block" onclick="addTransaction()">Simpan Transaksi</button>
+                        </div>
+                    </div>
+
+                    <div class="panel transaction-panel" id="transactions">
+                        <div class="panel-header">
+                            <div>
+                                <span class="panel-tag">Transaksi</span>
+                                <h2>Riwayat & Filter</h2>
+                            </div>
+                            <div class="panel-actions">
+                                <button class="btn btn-secondary" onclick="resetFilters()">Reset Filter</button>
+                                <button class="btn btn-success" onclick="showMonthlyReport()">Laporan</button>
+                                <button class="btn btn-primary" onclick="exportToCSV()">Ekspor CSV</button>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="filter-row">
+                                <input id="filter-search" type="text" placeholder="Cari deskripsi..." class="form-control" oninput="applyFilters()">
+                                <select id="filter-category" class="form-control" onchange="applyFilters()">
+                                    <option value="">Semua kategori</option>
+                                    <option value="Makanan">Makanan</option>
+                                    <option value="Transportasi">Transportasi</option>
+                                    <option value="Kerja">Kerja</option>
+                                    <option value="Hiburan">Hiburan</option>
+                                    <option value="Kesehatan">Kesehatan</option>
+                                    <option value="Pendidikan">Pendidikan</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                                <select id="filter-type" class="form-control" onchange="applyFilters()">
+                                    <option value="">Semua tipe</option>
+                                    <option value="income">Pendapatan</option>
+                                    <option value="expense">Pengeluaran</option>
+                                </select>
+                            </div>
+                            <div class="filter-row">
+                                <div class="form-group half">
+                                    <label>Mulai</label>
+                                    <input id="filter-date-start" type="date" class="form-control" onchange="applyFilters()">
+                                </div>
+                                <div class="form-group half">
+                                    <label>Akhir</label>
+                                    <input id="filter-date-end" type="date" class="form-control" onchange="applyFilters()">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="transactions-table-container" class="table-responsive"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div id="monthly-report-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 Laporan Bulanan</h2>
+                <button class="btn-close" onclick="closeModal('monthly-report-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="monthly-report-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>

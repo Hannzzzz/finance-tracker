@@ -1,0 +1,49 @@
+{
+  "name": "finance-tracker",
+  "version": "1.0.0",
+  "description": "Finance Tracker desktop app with secure account login, analytics, and Windows build support.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --windows --x64",
+    "pack": "electron-builder --dir --windows --x64"
+  },
+  "keywords": [
+    "finance",
+    "tracker",
+    "electron",
+    "productivity",
+    "dashboard"
+  ],
+  "author": "Finance Tracker",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^26.2.0",
+    "electron-builder": "^24.6.0"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.1"
+  },
+  "build": {
+    "appId": "com.financetracker.app",
+    "productName": "FinanceTracker",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
